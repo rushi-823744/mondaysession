@@ -1,0 +1,132 @@
+https://gist.github.com/Fysi/ccf3d9bafed3309296d22fd652f4beba
+
+
+#Import the PSSlack module
+Import-Module PSSlack
+
+#Set user credentials
+$User = "$env:UserDomain\$env:UserName"
+$PasswordFile = ".\Password.txt"
+$KeyFile = ".\AES.key"
+$key = Get-Content $KeyFile
+$MyCredential = New-Object -TypeName System.Management.Automation.PSCredential `
+ -ArgumentList $User, (Get-Content $PasswordFile | ConvertTo-SecureString -Key $key)
+
+#Set Slack auth 
+$token = ''
+
+#SQL Vars
+$SqlServer = "someserver"
+$Database = "somedatabase"
+$SqlQuery = 'exec usp_somequery'
+$Results = Invoke-Sqlcmd -Query $SqlQuery -ServerInstance $SqlServer -Database $Database
+
+#File Path
+$ExportFile = ".\Results - $(get-date -f yyyy-MM-dd).csv"
+
+#Remove the export file if exists
+if (Test-Path -Path $ExportFile -PathType Leaf) {
+    Remove-Item $ExportFile -Force
+}
+
+#Email Vars
+$SMTPServer = "smtp.company.com" 
+$EmailTo = "you@company.com"
+$EmailFrom = "server@company.com"
+$Subject = "Some SQL Things" 
+$SMTPMessage = New-Object System.Net.Mail.MailMessage($EmailFrom,$EmailTo,$Subject,$Body)
+$SMTPClient = New-Object Net.Mail.SmtpClient($SmtpServer, 587) 
+$SMTPClient.EnableSsl = $true 
+$SMTPClient.Credentials = New-Object System.Net.NetworkCredential($MyCredential.UserName, $MyCredential.Password); 
+
+#If not null then send messages
+if ($results -ne $null) {
+    #Export SQL Results to CSV
+    $results | Export-CSV -Path $ExportFile -NoTypeInformation
+    #Attach CSV to Email
+    $attachment = New-Object System.Net.Mail.Attachment($ExportFile)
+    $SMTPMessage.Attachments.Add($attachment)
+    #Create Slack Message
+    New-SlackMessageAttachment -Color $([System.Drawing.Color]::red) `
+                           -Title $Subject `
+                           -Text $ExportFile `
+                           -Pretext 'Everything is broken' `
+                           -Fallback 'Your client is bad' |
+    New-SlackMessage -Channel 'channel name without #' `
+                     -Username 'Bob' `
+                     -IconUrl 'http://i.imgur.com/WiUdDbu.jpg' |
+    Send-SlackMessage -Token $Token
+   
+     }
+else{
+      $Body = "SQL Result was blank" 
+     }
+
+#Send email
+$SMTPClient.Send($SMTPMessage)
+
+#2
+https://lukieb.wordpress.com/2011/03/03/powershell-script-to-send-sql-server-query-results-via-e-mail/
+
+333333
+https://www.emailarchitect.net/easendmail/kb/powershell.aspx?cat=1
+
+4444444444444
+https://social.technet.microsoft.com/Forums/ie/en-US/0c033037-49a1-46bb-a2c0-fc33d6348ea4/email-sql-query-results-from-powershell?forum=winserverpowershell
+
+55555555555555555
+https://www.sqlshack.com/working-with-powershells-invoke-sqlcmd/
+
+
+https://blog.mailtrap.io/powershell-send-email/
+
+6666
+https://social.technet.microsoft.com/forums/en-us/home?forum=winserverpowershell
+https://stackoverflow.com/questions/tagged/powershell
+
+
+#Get SQL Database objects and places them into array $ServerBook
+$ServerBook = New-Object System.Data.DataSet "myDataSet"
+	$sqlConn = New-Object System.Data.SqlClient.SqlConnection("Data Source=<Database Server>;Initial Catalog=ServerBook;Integrated Security=True")
+	$adapter = New-Object System.Data.SqlClient.SqlDataAdapter("SELECT ServerName,Owner,SupportContact,SupportExternal,ServerDescription FROM v_ServerBook_BasicInfo", $sqlConn)
+	$adapter.Fill($ServerBook)	
+
+
+$ServerBook = $ServerBook.Tables[0] | Sort-Object -Property Owner #reorganizes $serverBook by owner
+$owners = ($ServerBook.owner | Get-Unique) #stores list of unique owners and eliminates duplicates
+$owners = $owners | where{$_ -ne "" -and $_ -ne $null -and $_ -ne [dbnull]::value} #eliminates null values from the list of owners
+
+foreach($owner in $owners){
+#Get the servers for the current owner
+$servers = $ServerBook | where{$_.owner -eq $owner}
+
+#Add to server list for current owner to an array
+$ServerList = $servers | select ServerName, Owner, SupportContact, SupportExternal, ServerDescription
+
+#copies the server owners name to $ownername variable
+$ownerName = $owner 
+
+#Changes the format of the name to lastname, firstname is only needed if that is the format of the display name in AD
+$Username = "$($Owner.Split(" ")[1]), $($Owner.Split(" ")[0])"
+
+#pulls email address of the $username
+$EmailAddress = Get-ADuser -Filter "Name -eq '$Username'" -properties emailaddress -server ads.domain.com | select-object emailaddress
+
+#splits the $emailAddress vaiable to help eliminate extra text
+$emailaddress = $emailaddress -split '[=}]' ,0 
+
+#removes extra text at the beginning of the variable
+$emailaddress = $emailaddress.TrimStart("@{emailaddress") 
+
+#created CSS for formatting the table in the HTML email body
+$style = "<style>BODY{font-family: Arial; font-size: 10pt;}"
+$style = $style + "TABLE{border: 1px solid black; border-collapse: collapse;}"
+$style = $style + "TH{border: 1px solid black; background: #dddddd; padding: 5px;}"
+$style
+
+
+
+
+
+
+
