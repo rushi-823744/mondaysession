@@ -3,9 +3,10 @@ https://gist.github.com/Fysi/ccf3d9bafed3309296d22fd652f4beba
 
 #Import the PSSlack module
 Import-Module PSSlack
-
+asasasasaasas
+varsion2
 #Set user credentials
-$User = "$env:UserDomain\$env:UserName"
+$User = "$env:UserDomain\$env:UserName"fdfdfd
 $key = Get-Content $KeyFile
 $MyCredential = New-Object -TypeName System.Management.Automation.PSCredential `
  -ArgumentList $User, (Get-Content $PasswordFile | ConvertTo-SecureString -Key $key)

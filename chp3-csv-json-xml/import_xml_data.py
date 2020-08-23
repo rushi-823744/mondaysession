@@ -3,9 +3,9 @@ from xml.etree import ElementTree as ET
 tree = ET.parse('../../data/chp3/data-text.xml')
 root = tree.getroot()
 print root
-
-data = root.find('Data')
-
+asasasas
+data = root.find('Data')sasasas
+asasasas
 all_data = []
 
 for observation in data:
