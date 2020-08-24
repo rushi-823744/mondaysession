@@ -1,7 +1,7 @@
-https://gist.github.com/Fysi/ccf3d9bafed3309296d22fd652f4beba
 
 
-#Import the PSSlack module
+
+
 Import-Module PSSlack
 
 #Set user credentials
